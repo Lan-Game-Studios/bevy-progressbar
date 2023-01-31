@@ -1,0 +1,16 @@
+[package]
+name = "bevy-progressbar"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy_app = "0.9.1"
+bevy_asset = "0.9.1"
+bevy_ecs = "0.9.1"
+bevy_render = "0.9.1"
+bevy_ui = "0.9.1"
+
+[dev-dependencies]
+bevy = "0.9.1"
