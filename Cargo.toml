@@ -2,8 +2,15 @@
 name = "bevy-progressbar"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license-file = "LICENSE.md"
+description = "Create multi sectons progressbars and use them in the bevy ui"
+repository = "https://github.com/tecbeast42/bevy-progressbar"
+readme = "README.md"
+keywords = ["gamedev", "progressbar", "ui", "bevy_ui"]
+categories = ["game-development"]
+exclude = [
+    ".github/*",
+]
 
 [dependencies]
 bevy_app = "0.9.1"

@@ -1,8 +1,15 @@
-use bevy_ecs::prelude::{Component, Query, Bundle, ResMut, With};
-use bevy_ui::{prelude::{ImageBundle, Style, Val}, UiImage};
-use bevy_asset::prelude::{Handle, Assets};
-use bevy_render::{prelude::Image, render_resource::Extent3d, texture::ImageSampler, prelude::Color};
 use bevy_app::prelude::Plugin;
+use bevy_asset::prelude::Assets;
+use bevy_ecs::prelude::{Bundle, Component, Query, ResMut, With};
+use bevy_render::{
+    prelude::Color, prelude::Image, render_resource::Extent3d, texture::ImageSampler,
+};
+use bevy_ui::{
+    prelude::{ImageBundle, Style, Val},
+    UiImage,
+};
+
+const BACKGROUND_COLOR: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 
 #[derive(Component)]
 pub struct ProgressBar;
@@ -30,18 +37,18 @@ pub struct ProgressBarBundle {
 }
 
 impl ProgressBarBundle {
-    pub fn new(amount: u32, width: u32, height: u32, mut images: ResMut<Assets<Image>>) -> Self {
+    pub fn new(amount: u32, width: u32, height: u32, images: &mut ResMut<Assets<Image>>) -> Self {
         Self {
-            size: ProgressBarSize{
-                width,
-                height,
-            },
+            size: ProgressBarSize { width, height },
             progressbar: ProgressBar,
             amount: Amount(amount),
             sections: ProgressbarSections::default(),
             image_bundle: ImageBundle {
                 style: Style {
-                    size: bevy_ui::Size { width: Val::Px(width as f32), height: Val::Px(height as f32) } ,
+                    size: bevy_ui::Size {
+                        width: Val::Px(width as f32),
+                        height: Val::Px(height as f32),
+                    },
                     ..Default::default()
                 },
                 image: images.add(Self::image(width, height)).into(),
@@ -61,7 +68,7 @@ impl ProgressBarBundle {
 
         for pixel in pixel_data.iter() {
             for color_channel in pixel.iter() {
-                image_data.extend_from_slice(&color_channel.to_le_bytes()); 
+                image_data.extend_from_slice(&color_channel.to_le_bytes());
             }
         }
 
@@ -70,9 +77,9 @@ impl ProgressBarBundle {
                 width,
                 height,
                 depth_or_array_layers: 1,
-            }, 
-            bevy_render::render_resource::TextureDimension::D2, 
-            image_data, 
+            },
+            bevy_render::render_resource::TextureDimension::D2,
+            image_data,
             format,
         );
 
@@ -82,12 +89,18 @@ impl ProgressBarBundle {
     }
 
     pub fn add_section(mut self, amount: u32, color: Color) -> Self {
-        // check that progressbar does not overflow
-        // TODO add test for this
-        let total = self.sections.0.iter().fold(0, |acc, section| acc + section.0) + amount;
+        let total = self
+            .sections
+            .0
+            .iter()
+            .fold(0, |acc, section| acc + section.0)
+            + amount;
 
         if total > self.amount.0 {
-            panic!("The progressbar can is overfilled {} of {} amount", total, self.amount.0);
+            panic!(
+                "The progressbar is overfilled {} of {} amount",
+                total, self.amount.0
+            );
         }
 
         self.sections.0.push((amount, color));
@@ -95,7 +108,7 @@ impl ProgressBarBundle {
         self
     }
 
-    pub fn clear_sections(& mut self) -> &mut Self {
+    pub fn clear_sections(&mut self) -> &mut Self {
         self.sections = ProgressbarSections::default();
 
         self
@@ -110,48 +123,66 @@ impl Plugin for ProgressBarPlugin {
     }
 }
 
-fn update_image (
+fn update_image(
     query: Query<(&ProgressBarSize, &UiImage, &ProgressbarSections, &Amount), With<ProgressBar>>,
     mut images: ResMut<Assets<Image>>,
 ) {
     for (size, ui_image, sections, amount) in query.iter() {
-        let mut image = images.get_mut(&ui_image.0)
-            .expect("Progressbar image missing, should have been created through the bundle creation");
-        
+        let mut image = images.get_mut(&ui_image.0).expect(
+            "Progressbar image missing, should have been created through the bundle creation",
+        );
+
         let pixels = size.width * size.height;
         let mut pixel_data: Vec<[f32; 4]> = Vec::new();
         pixel_data.resize(pixels as usize, [1.0, 1.0, 0.0, 1.0]); // default to all pixels transparent
         let mut image_data: Vec<u8> = Vec::new();
 
         // transform absolute amount to percentage
-        let relative_sections: Vec<(f32, Color)> = sections.0.iter()
-            .map(|(absolute_amount, color)| ((*absolute_amount as f32/ amount.0 as f32), color.clone()))
+        let relative_sections: Vec<(f32, Color)> = sections
+            .0
+            .iter()
+            .map(|(absolute_amount, color)| {
+                ((*absolute_amount as f32 / amount.0 as f32), *color)
+            })
             .collect();
 
-        println!("{relative_sections:?}");
-
-        let mut i = 0;
-        for mut pixel in pixel_data.iter() {
-            let x: u32 = i % size.width;
+        for (i, mut pixel) in pixel_data.iter().enumerate() {
+            let x: u32 = i as u32 % size.width;
             // let y: u32 = i / size.width;
             let x_percentage: f32 = x as f32 / size.width as f32;
             // let y_percentage: f32 = y as f32 / size.height as f32;
-            let color: &[f32; 4] = &relative_sections.iter()
-                .fold((0f32, Color::INDIGO), |(sum, selected_color), (percentage, color)| {
-                    let new_sum = sum + percentage;
-                    if new_sum < 1.0 - x_percentage {
-                        (new_sum, color.clone())
-                    } else {
-                        (new_sum, selected_color)
-                    }
-                }).1.as_rgba_f32();
-            pixel = color;
-            // let mut c: u8 = 0;
+            let color: Color = relative_sections
+                .iter()
+                .fold(
+                    (0f32, BACKGROUND_COLOR),
+                    |(sum, selected_color), (percentage, color)| {
+                        let new_sum = sum + percentage;
+                        let current_color = if sum < x_percentage {
+                            *color
+                        } else {
+                            selected_color
+                        };
+                        (new_sum, current_color)
+                    },
+                )
+                .1;
+
+            let color_floats = if x_percentage
+                > relative_sections
+                    .iter()
+                    .map(|(percentage, _)| percentage)
+                    .sum()
+            {
+                BACKGROUND_COLOR.as_rgba_f32()
+            } else {
+                color.as_rgba_f32()
+            };
+
+            pixel = &color_floats;
+
             for color_channel in pixel.iter() {
-                image_data.extend_from_slice(&color_channel.to_le_bytes()); 
-                // c += 1;
+                image_data.extend_from_slice(&color_channel.to_le_bytes());
             }
-            i += 1;
         }
 
         image.data = image_data;

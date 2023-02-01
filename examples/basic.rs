@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_progressbar::{Amount, ProgressBarBundle};
+use bevy_progressbar::ProgressBarBundle;
 
 fn main() {
     App::new()
@@ -9,27 +9,38 @@ fn main() {
             commands.spawn(Camera2dBundle::default());
         })
         .add_startup_system(setup)
-        .add_system(update)
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    images: ResMut<Assets<Image>>,
-) {
-    commands.spawn(
-        ProgressBarBundle::new(10_000, 1000, 100, images)
-            .add_section(1000, Color::RED)
-            .add_section(2000, Color::BLUE)
-            .add_section(4000, Color::GREEN)
-    );
-    println!("spawn successfull");
-}
+fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
+    commands
+        .spawn(NodeBundle {
+            style: Style {
+                flex_direction: FlexDirection::Column,
+                ..default()
+            },
+            ..default()
+        })
+        .with_children(|node| {
+            node.spawn(
+                ProgressBarBundle::new(10_000, 1000, 100, &mut images)
+                    .add_section(1000, Color::RED)
+                    .add_section(2000, Color::BLUE)
+                    .add_section(4000, Color::GREEN),
+            );
 
-fn update(
-    query: Query<(&Amount, &Transform)>
-) {
-    for (amount, transform) in query.iter() {
-        println!("Amount {} Position {:?}", amount.0, transform.translation.truncate());
-    }
+            node.spawn(
+                ProgressBarBundle::new(100, 1000, 20, &mut images)
+                    .add_section(10, Color::TEAL)
+                    .add_section(70, Color::INDIGO)
+                    .add_section(20, Color::BEIGE),
+            );
+
+            node.spawn(
+                ProgressBarBundle::new(100, 1000, 100, &mut images)
+                    .add_section(6, Color::RED)
+                    .add_section(32, Color::CYAN)
+                    .add_section(21, Color::MIDNIGHT_BLUE),
+            );
+        });
 }
