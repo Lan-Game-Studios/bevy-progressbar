@@ -134,7 +134,7 @@ fn update_image(
 
         let pixels = size.width * size.height;
         let mut pixel_data: Vec<[f32; 4]> = Vec::new();
-        pixel_data.resize(pixels as usize, [1.0, 1.0, 0.0, 1.0]); // default to all pixels transparent
+        pixel_data.resize(pixels as usize, [0.0, 0.0, 0.0, 0.0]); // default to all pixels transparent
         let mut image_data: Vec<u8> = Vec::new();
 
         // transform absolute amount to percentage
