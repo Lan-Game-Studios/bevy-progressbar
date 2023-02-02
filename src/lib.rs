@@ -21,7 +21,7 @@ pub struct ProgressBarSize {
 }
 
 #[derive(Component, Default)]
-pub struct ProgressbarSections(Vec<(u32, Color)>);
+pub struct ProgressBarSections(Vec<(u32, Color)>);
 
 #[derive(Component)]
 pub struct Amount(pub u32);
@@ -30,7 +30,7 @@ pub struct Amount(pub u32);
 pub struct ProgressBarBundle {
     size: ProgressBarSize,
     amount: Amount,
-    sections: ProgressbarSections,
+    sections: ProgressBarSections,
     progressbar: ProgressBar,
     #[bundle]
     image_bundle: ImageBundle,
@@ -42,7 +42,7 @@ impl ProgressBarBundle {
             size: ProgressBarSize { width, height },
             progressbar: ProgressBar,
             amount: Amount(amount),
-            sections: ProgressbarSections::default(),
+            sections: ProgressBarSections::default(),
             image_bundle: ImageBundle {
                 style: Style {
                     size: bevy_ui::Size {
@@ -109,7 +109,7 @@ impl ProgressBarBundle {
     }
 
     pub fn clear_sections(&mut self) -> &mut Self {
-        self.sections = ProgressbarSections::default();
+        self.sections = ProgressBarSections::default();
 
         self
     }
@@ -124,7 +124,7 @@ impl Plugin for ProgressBarPlugin {
 }
 
 fn update_image(
-    query: Query<(&ProgressBarSize, &UiImage, &ProgressbarSections, &Amount), With<ProgressBar>>,
+    query: Query<(&ProgressBarSize, &UiImage, &ProgressBarSections, &Amount), With<ProgressBar>>,
     mut images: ResMut<Assets<Image>>,
 ) {
     for (size, ui_image, sections, amount) in query.iter() {
