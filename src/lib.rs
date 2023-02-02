@@ -141,9 +141,7 @@ fn update_image(
         let relative_sections: Vec<(f32, Color)> = sections
             .0
             .iter()
-            .map(|(absolute_amount, color)| {
-                ((*absolute_amount as f32 / amount.0 as f32), *color)
-            })
+            .map(|(absolute_amount, color)| ((*absolute_amount as f32 / amount.0 as f32), *color))
             .collect();
 
         for (i, mut pixel) in pixel_data.iter().enumerate() {
