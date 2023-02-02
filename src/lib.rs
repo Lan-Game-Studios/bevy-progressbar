@@ -21,7 +21,7 @@ pub struct ProgressBarSize {
 }
 
 #[derive(Component, Default)]
-pub struct ProgressBarSections(Vec<(u32, Color)>);
+pub struct ProgressBarSections(pub Vec<(u32, Color)>);
 
 #[derive(Component)]
 pub struct Amount(pub u32);
