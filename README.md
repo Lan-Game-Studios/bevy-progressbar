@@ -29,6 +29,11 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
 }
 ```
 
+| Version | Bevy Version |
+|---------|--------------|
+| 0.2.1   | 0.9          |
+| 0.3.0   | 0.10         |
+
 ## TODO
 
 - [ ] optimize the image creation, by just doing one line and let the gpu use nearst neighbour to scale the texture

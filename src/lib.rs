@@ -128,7 +128,7 @@ fn update_image(
     mut images: ResMut<Assets<Image>>,
 ) {
     for (size, ui_image, sections, amount) in query.iter() {
-        let mut image = images.get_mut(&ui_image.0).expect(
+        let mut image = images.get_mut(&ui_image.texture).expect(
             "Progressbar image missing, should have been created through the bundle creation",
         );
 

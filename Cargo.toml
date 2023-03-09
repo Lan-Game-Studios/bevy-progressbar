@@ -1,6 +1,6 @@
 [package]
 name = "bevy-progressbar"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 license-file = "LICENSE.md"
 description = "Create multi sectons progressbars and use them in the bevy ui"
@@ -13,11 +13,11 @@ exclude = [
 ]
 
 [dependencies]
-bevy_app = "0.9.1"
-bevy_asset = "0.9.1"
-bevy_ecs = "0.9.1"
-bevy_render = "0.9.1"
-bevy_ui = "0.9.1"
+bevy_app = "0.10.0"
+bevy_asset = "0.10.0"
+bevy_ecs = "0.10.0"
+bevy_render = "0.10.0"
+bevy_ui = "0.10.0"
 
 [dev-dependencies]
-bevy = "0.9.1"
+bevy = "0.10.0"
