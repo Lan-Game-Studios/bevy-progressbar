@@ -32,7 +32,7 @@ pub struct ProgressBarBundle {
     amount: Amount,
     sections: ProgressBarSections,
     progressbar: ProgressBar,
-    #[bundle]
+    #[bundle()]
     image_bundle: ImageBundle,
 }
 
@@ -45,10 +45,8 @@ impl ProgressBarBundle {
             sections: ProgressBarSections::default(),
             image_bundle: ImageBundle {
                 style: Style {
-                    size: bevy_ui::Size {
-                        width: Val::Px(width as f32),
-                        height: Val::Px(height as f32),
-                    },
+                    width: Val::Px(width as f32),
+                    height: Val::Px(height as f32),
                     ..Default::default()
                 },
                 image: images.add(Self::image(width, height)).into(),
@@ -119,7 +117,7 @@ pub struct ProgressBarPlugin;
 
 impl Plugin for ProgressBarPlugin {
     fn build(&self, app: &mut bevy_app::App) {
-        app.add_system(update_image);
+        app.add_systems(bevy_app::Update, update_image);
     }
 }
 
@@ -128,7 +126,7 @@ fn update_image(
     mut images: ResMut<Assets<Image>>,
 ) {
     for (size, ui_image, sections, amount) in query.iter() {
-        let mut image = images.get_mut(&ui_image.texture).expect(
+        let image = images.get_mut(&ui_image.texture).expect(
             "Progressbar image missing, should have been created through the bundle creation",
         );
 

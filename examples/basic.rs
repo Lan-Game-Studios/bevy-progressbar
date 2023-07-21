@@ -4,11 +4,16 @@ use bevy_progressbar::ProgressBarBundle;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(bevy_progressbar::ProgressBarPlugin)
-        .add_startup_system(|mut commands: Commands| {
-            commands.spawn(Camera2dBundle::default());
-        })
-        .add_startup_system(setup)
+        .add_plugins(bevy_progressbar::ProgressBarPlugin)
+        .add_systems(
+            Startup,
+            (
+                |mut commands: Commands| {
+                    commands.spawn(Camera2dBundle::default());
+                },
+                setup,
+            ),
+        )
         .run();
 }
 
