@@ -1,5 +1,9 @@
 use bevy::prelude::*;
+use bevy::sprite::MaterialMesh2dBundle;
 use bevy_progressbar::ProgressBarBundle;
+use bevy_progressbar::ProgressBarMaterial;
+use bevy_render::mesh::shape::Quad;
+use bevy_sprite::Mesh2d;
 
 fn main() {
     App::new()
@@ -17,7 +21,18 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
+fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ProgressBarMaterial>>,
+         ) {
+    commands.spawn(MaterialMesh2dBundle {
+        mesh: meshes.add(Quad::new(Vec2::new(20., 20.)).into()).into(),
+        transform: Transform::from_xyz(0.0, 0.5, 0.0),
+        material: materials.add(ProgressBarMaterial {
+            color: Color::BLUE,
+        }),
+        ..default()
+    });
     commands
         .spawn(NodeBundle {
             style: Style {

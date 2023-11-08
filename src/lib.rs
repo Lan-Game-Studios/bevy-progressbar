@@ -1,9 +1,12 @@
 use bevy_app::prelude::Plugin;
-use bevy_asset::prelude::Assets;
+use bevy_asset::{prelude::Assets, Asset};
 use bevy_ecs::prelude::{Bundle, Component, Query, ResMut, With};
+use bevy_pbr::{Material, MaterialPlugin};
+use bevy_reflect::TypePath;
 use bevy_render::{
-    prelude::Color, prelude::Image, render_resource::Extent3d, texture::ImageSampler,
+    prelude::Color, prelude::Image, render_resource::{Extent3d, AsBindGroup}, texture::ImageSampler,
 };
+use bevy_sprite::{Material2d, Material2dPlugin};
 use bevy_ui::{
     prelude::{ImageBundle, Style, Val},
     UiImage,
@@ -117,7 +120,8 @@ pub struct ProgressBarPlugin;
 
 impl Plugin for ProgressBarPlugin {
     fn build(&self, app: &mut bevy_app::App) {
-        app.add_systems(bevy_app::Update, update_image);
+        app.add_systems(bevy_app::Update, update_image)
+            .add_plugins(Material2dPlugin::<ProgressBarMaterial>::default());
     }
 }
 
@@ -182,5 +186,17 @@ fn update_image(
         }
 
         image.data = image_data;
+    }
+}
+
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+pub struct ProgressBarMaterial {
+    #[uniform(0)]
+    pub color: Color,
+}
+
+impl Material2d for ProgressBarMaterial {
+    fn fragment_shader() -> bevy_render::render_resource::ShaderRef {
+       "shader/progress_shader.wsgl".into() 
     }
 }
