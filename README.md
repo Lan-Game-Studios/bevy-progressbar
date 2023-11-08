@@ -34,6 +34,7 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
 | 0.2.1   | 0.9          |
 | 0.3.0   | 0.10         |
 | 0.4.0   | 0.11         |
+| 0.5.0   | 0.12         |
 
 ## TODO
 

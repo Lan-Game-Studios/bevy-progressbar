@@ -81,7 +81,7 @@ impl ProgressBarBundle {
             format,
         );
 
-        image.sampler_descriptor = ImageSampler::nearest();
+        image.sampler = ImageSampler::nearest();
 
         image
     }
