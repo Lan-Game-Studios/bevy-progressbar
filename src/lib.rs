@@ -1,202 +1,126 @@
 use bevy_app::prelude::Plugin;
-use bevy_asset::{prelude::Assets, Asset};
-use bevy_ecs::prelude::{Bundle, Component, Query, ResMut, With};
-use bevy_pbr::{Material, MaterialPlugin};
+use bevy_asset::{prelude::Assets, Asset, Handle};
+use bevy_ecs::prelude::{Bundle, Component, Query, ResMut};
 use bevy_reflect::TypePath;
-use bevy_render::{
-    prelude::Color, prelude::Image, render_resource::{Extent3d, AsBindGroup}, texture::ImageSampler,
-};
-use bevy_sprite::{Material2d, Material2dPlugin};
-use bevy_ui::{
-    prelude::{ImageBundle, Style, Val},
-    UiImage,
-};
-
-const BACKGROUND_COLOR: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
-
-#[derive(Component)]
-pub struct ProgressBar;
-
-#[derive(Component)]
-pub struct ProgressBarSize {
-    width: u32,
-    height: u32,
-}
-
-#[derive(Component, Default)]
-pub struct ProgressBarSections(pub Vec<(u32, Color)>);
-
-#[derive(Component)]
-pub struct Amount(pub u32);
-
-#[derive(Bundle)]
-pub struct ProgressBarBundle {
-    size: ProgressBarSize,
-    amount: Amount,
-    sections: ProgressBarSections,
-    progressbar: ProgressBar,
-    #[bundle()]
-    image_bundle: ImageBundle,
-}
-
-impl ProgressBarBundle {
-    pub fn new(amount: u32, width: u32, height: u32, images: &mut ResMut<Assets<Image>>) -> Self {
-        Self {
-            size: ProgressBarSize { width, height },
-            progressbar: ProgressBar,
-            amount: Amount(amount),
-            sections: ProgressBarSections::default(),
-            image_bundle: ImageBundle {
-                style: Style {
-                    width: Val::Px(width as f32),
-                    height: Val::Px(height as f32),
-                    ..Default::default()
-                },
-                image: images.add(Self::image(width, height)).into(),
-                ..Default::default()
-            },
-        }
-    }
-}
-
-impl ProgressBarBundle {
-    fn image(width: u32, height: u32) -> Image {
-        let format = bevy_render::render_resource::TextureFormat::Rgba32Float;
-        let pixels = width * height;
-        let mut pixel_data: Vec<[f32; 4]> = Vec::new();
-        pixel_data.resize(pixels as usize, [1.0, 0.0, 0.0, 1.0]); // default to all pixels transparent
-        let mut image_data: Vec<u8> = Vec::new();
-
-        for pixel in pixel_data.iter() {
-            for color_channel in pixel.iter() {
-                image_data.extend_from_slice(&color_channel.to_le_bytes());
-            }
-        }
-
-        let mut image = Image::new(
-            Extent3d {
-                width,
-                height,
-                depth_or_array_layers: 1,
-            },
-            bevy_render::render_resource::TextureDimension::D2,
-            image_data,
-            format,
-        );
-
-        image.sampler = ImageSampler::nearest();
-
-        image
-    }
-
-    pub fn add_section(mut self, amount: u32, color: Color) -> Self {
-        let total = self
-            .sections
-            .0
-            .iter()
-            .fold(0, |acc, section| acc + section.0)
-            + amount;
-
-        if total > self.amount.0 {
-            panic!(
-                "The progressbar is overfilled {} of {} amount",
-                total, self.amount.0
-            );
-        }
-
-        self.sections.0.push((amount, color));
-
-        self
-    }
-
-    pub fn clear_sections(&mut self) -> &mut Self {
-        self.sections = ProgressBarSections::default();
-
-        self
-    }
-}
+use bevy_render::{prelude::Color, render_resource::AsBindGroup};
+use bevy_ui::{node_bundles::MaterialNodeBundle, Style, UiMaterial, UiMaterialPlugin};
 
 pub struct ProgressBarPlugin;
 
 impl Plugin for ProgressBarPlugin {
     fn build(&self, app: &mut bevy_app::App) {
-        app.add_systems(bevy_app::Update, update_image)
-            .add_plugins(Material2dPlugin::<ProgressBarMaterial>::default());
+        app.add_systems(bevy_app::Update, update_progress_bar)
+            .add_plugins(UiMaterialPlugin::<ProgressBarMaterial>::default());
     }
 }
 
-fn update_image(
-    query: Query<(&ProgressBarSize, &UiImage, &ProgressBarSections, &Amount), With<ProgressBar>>,
-    mut images: ResMut<Assets<Image>>,
-) {
-    for (size, ui_image, sections, amount) in query.iter() {
-        let image = images.get_mut(&ui_image.texture).expect(
-            "Progressbar image missing, should have been created through the bundle creation",
-        );
+#[derive(Component)]
+pub struct ProgressBar {
+    pub progress: f32,
+    pub sections: Vec<(u32, Color)>,
+}
 
-        let pixels = size.width * size.height;
-        let mut pixel_data: Vec<[f32; 4]> = Vec::new();
-        pixel_data.resize(pixels as usize, [0.0, 0.0, 0.0, 0.0]); // default to all pixels transparent
-        let mut image_data: Vec<u8> = Vec::new();
-
-        // transform absolute amount to percentage
-        let relative_sections: Vec<(f32, Color)> = sections
-            .0
-            .iter()
-            .map(|(absolute_amount, color)| ((*absolute_amount as f32 / amount.0 as f32), *color))
-            .collect();
-
-        for (i, mut pixel) in pixel_data.iter().enumerate() {
-            let x: u32 = i as u32 % size.width;
-            // let y: u32 = i / size.width;
-            let x_percentage: f32 = x as f32 / size.width as f32;
-            // let y_percentage: f32 = y as f32 / size.height as f32;
-            let color: Color = relative_sections
-                .iter()
-                .fold(
-                    (0f32, BACKGROUND_COLOR),
-                    |(sum, selected_color), (percentage, color)| {
-                        let new_sum = sum + percentage;
-                        let current_color = if sum < x_percentage {
-                            *color
-                        } else {
-                            selected_color
-                        };
-                        (new_sum, current_color)
-                    },
-                )
-                .1;
-
-            let color_floats = if x_percentage
-                > relative_sections
-                    .iter()
-                    .map(|(percentage, _)| percentage)
-                    .sum()
-            {
-                BACKGROUND_COLOR.as_rgba_f32()
-            } else {
-                color.as_rgba_f32()
-            };
-
-            pixel = &color_floats;
-
-            for color_channel in pixel.iter() {
-                image_data.extend_from_slice(&color_channel.to_le_bytes());
-            }
+impl ProgressBar {
+    pub fn new(sections: Vec<(u32, Color)>) -> Self {
+        Self {
+            progress: 0.0,
+            sections,
         }
+    }
+    pub fn increase_progress(&mut self, amount: f32) {
+        self.progress += amount;
+        self.progress = self.progress.clamp(0.0, 1.0);
+    }
 
-        image.data = image_data;
+    pub fn reset(&mut self) {
+        self.progress = 0.0;
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.progress >= 1.0
+    }
+}
+
+#[derive(Bundle)]
+pub struct ProgressBarBundle {
+    progressbar: ProgressBar,
+    material_node_bundle: MaterialNodeBundle<ProgressBarMaterial>,
+}
+
+impl ProgressBarBundle {
+    pub fn new(
+        style: Style,
+        progressbar: ProgressBar,
+        materials: &mut ResMut<Assets<ProgressBarMaterial>>,
+    ) -> ProgressBarBundle {
+        ProgressBarBundle {
+            progressbar,
+            material_node_bundle: MaterialNodeBundle {
+                style,
+                material: materials.add(ProgressBarMaterial::default()),
+                ..bevy_utils::default()
+            },
+        }
     }
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct ProgressBarMaterial {
     #[uniform(0)]
-    pub color: Color,
+    pub empty_color: Color,
+    #[uniform(1)]
+    pub progress: f32,
+    // check if these can be combined in a unit or struct
+    #[storage(2)]
+    pub segment: Vec<Color>,
+    #[storage(3)]
+    pub amount: Vec<f32>,
+    #[uniform(4)]
+    pub count: u32,
 }
 
-impl Material2d for ProgressBarMaterial {
+impl Default for ProgressBarMaterial {
+    fn default() -> Self {
+        Self {
+            empty_color: Color::NONE,
+            progress: 0.0,
+            segment: vec![],
+            amount: vec![],
+            count: 0,
+        }
+    }
+}
+
+impl ProgressBarMaterial {
+    pub fn update(&mut self, bar: &ProgressBar) {
+        self.progress = bar.progress;
+        self.segment = vec![];
+        self.amount = vec![];
+        let total_amount: u32 = bar.sections.iter().map(|(amount, _)| amount).sum();
+        for (amount, color) in bar.sections.iter() {
+            self.amount
+                .push(1. / (total_amount as f32 / *amount as f32));
+            self.segment.push(*color);
+        }
+        self.count = bar.sections.len() as u32;
+    }
+}
+
+impl UiMaterial for ProgressBarMaterial {
     fn fragment_shader() -> bevy_render::render_resource::ShaderRef {
-       "shader/progress_shader.wsgl".into() 
+        "shader/progress_shader.wgsl".into()
+    }
+}
+
+fn update_progress_bar(
+    bar_query: Query<(&ProgressBar, &Handle<ProgressBarMaterial>)>,
+    mut materials: ResMut<Assets<ProgressBarMaterial>>,
+) {
+    for (bar, handle) in bar_query.iter() {
+        let Some(material) = materials.get_mut(handle) else {
+            continue;
+        };
+
+        material.update(bar);
     }
 }
