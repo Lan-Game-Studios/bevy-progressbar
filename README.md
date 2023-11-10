@@ -37,6 +37,6 @@ fn setup(mut commands: Commands, mut materials: ResMut<Assets<ProgressBarMateria
 | 0.6.0   | 0.12         |
 
 ## TODO
-
+- [x] optimize the image creation, by just doing one line and let the gpu use nearst neighbour to scale the texture
 - [ ] (optional) render an outline of the progessbar 
 - [ ] (optional) allow or rounded corners
