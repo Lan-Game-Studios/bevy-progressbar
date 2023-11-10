@@ -13,18 +13,17 @@ cargo add bevy-progressbar
 > See examples for better understanding
 
 ```rust
-fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
+fn setup(mut commands: Commands, mut materials: ResMut<Assets<ProgressBarMaterial>>) {
+    let bar = ProgressBar::new(vec![(1000, Color::RED),(2000, Color::BLUE),(4000, Color::GREEN)]);
+    let style = Style {
+        position_type: PositionType::Absolute,
+        width: Val::Px(400.0),
+        height: Val::Px(200.0),
+        top: Val::Px(400.0),
+        ..bevy_utils::default()
+    };
     commands.spawn(
-        // progressbar size, width, height
-        ProgressBarBundle::new(10_000, 1000, 100, &mut images)
-            .add_section(1000, Color::RED)
-            .add_section(2000, Color::BLUE)
-            .add_section(4000, Color::GREEN),
-
-        ProgressBarBundle::new(10_000, 1000, 100, &mut images)
-            .add_section(1000, Color::RED)
-            .add_section(2000, Color::BLUE)
-            .add_section(4000, Color::GREEN),
+        ProgressBarBundle::new(style, bar, &mut materials);
     );
 }
 ```
@@ -35,9 +34,9 @@ fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
 | 0.3.0   | 0.10         |
 | 0.4.0   | 0.11         |
 | 0.5.0   | 0.12         |
+| 0.6.0   | 0.12         |
 
 ## TODO
-
-- [ ] optimize the image creation, by just doing one line and let the gpu use nearst neighbour to scale the texture
+- [x] optimize the image creation, by just doing one line and let the gpu use nearst neighbour to scale the texture
 - [ ] (optional) render an outline of the progessbar 
 - [ ] (optional) allow or rounded corners
