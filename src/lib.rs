@@ -1,15 +1,26 @@
 use bevy_app::prelude::Plugin;
-use bevy_asset::{prelude::Assets, Asset, Handle};
+use bevy_asset::{load_internal_asset, prelude::Assets, Asset, Handle};
 use bevy_ecs::prelude::{Bundle, Component, Query, ResMut};
-use bevy_reflect::TypePath;
-use bevy_render::{prelude::Color, render_resource::AsBindGroup};
+use bevy_reflect::{TypePath, TypeUuid};
+use bevy_render::{
+    prelude::Color,
+    render_resource::{AsBindGroup, Shader},
+};
 use bevy_ui::{node_bundles::MaterialNodeBundle, Style, UiMaterial, UiMaterialPlugin};
 use bevy_utils::default;
 
+pub const PROGRESS_BAR_HANDLE: Handle<Shader> =
+    Handle::weak_from_u128(8714649747086695632918559878778085427);
 pub struct ProgressBarPlugin;
 
 impl Plugin for ProgressBarPlugin {
     fn build(&self, app: &mut bevy_app::App) {
+        load_internal_asset!(
+            app,
+            PROGRESS_BAR_HANDLE,
+            "progress_shader.wgsl",
+            Shader::from_wgsl
+        );
         app.add_systems(bevy_app::Update, update_progress_bar)
             .add_plugins(UiMaterialPlugin::<ProgressBarMaterial>::default());
     }
@@ -166,7 +177,8 @@ impl ProgressBarBundle {
 
 /// The Material for the ProgressBar
 /// uses a simple wgsl shader
-#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
+#[derive(Asset, TypePath, AsBindGroup, TypeUuid, Debug, Clone)]
+#[uuid = "7d4aa28a-c01f-4ac7-b6f5-9b64cc3b4214"]
 pub struct ProgressBarMaterial {
     #[uniform(0)]
     empty_color: Color,
@@ -214,7 +226,7 @@ impl ProgressBarMaterial {
 
 impl UiMaterial for ProgressBarMaterial {
     fn fragment_shader() -> bevy_render::render_resource::ShaderRef {
-        "shader/progress_shader.wgsl".into()
+        PROGRESS_BAR_HANDLE.into()
     }
 }
 
