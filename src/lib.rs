@@ -1,7 +1,7 @@
 use bevy_app::prelude::Plugin;
 use bevy_asset::{load_internal_asset, prelude::Assets, Asset, Handle};
 use bevy_ecs::prelude::{Bundle, Component, Query, ResMut};
-use bevy_reflect::{TypePath, TypeUuid};
+use bevy_reflect::TypePath;
 use bevy_render::{
     prelude::Color,
     render_resource::{AsBindGroup, Shader},
@@ -177,17 +177,16 @@ impl ProgressBarBundle {
 
 /// The Material for the ProgressBar
 /// uses a simple wgsl shader
-#[derive(Asset, TypePath, AsBindGroup, TypeUuid, Debug, Clone)]
-#[uuid = "7d4aa28a-c01f-4ac7-b6f5-9b64cc3b4214"]
+#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct ProgressBarMaterial {
     #[uniform(0)]
     empty_color: Color,
     #[uniform(1)]
     progress: f32,
     /// The color of each section
-    #[storage(2)]
+    #[storage(2, read_only)]
     sections_color: Vec<Color>,
-    #[storage(3)]
+    #[storage(3, read_only)]
     sections_start_percentage: Vec<f32>,
     /// the length of the `sections_color` / `sections_start_percentage` vec.
     /// needs to be set for the shader
