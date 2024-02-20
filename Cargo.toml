@@ -2,7 +2,7 @@
 name = "bevy-progressbar"
 version = "0.7.0"
 edition = "2021"
-license-file = "LICENSE.md"
+license = "MIT"
 description = "Create multi sectons progressbars and use them in the bevy ui"
 repository = "https://github.com/tecbeast42/bevy-progressbar"
 readme = "README.md"
