@@ -35,6 +35,7 @@ fn setup(mut commands: Commands, mut materials: ResMut<Assets<ProgressBarMateria
 | 0.4.0   | 0.11         |
 | 0.5.0   | 0.12         |
 | 0.6.0   | 0.12         |
+| 0.7.0   | 0.13         |
 
 ## TODO
 - [x] optimize the image creation, by just doing one line and let the gpu use nearst neighbour to scale the texture
