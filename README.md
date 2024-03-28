@@ -6,7 +6,6 @@
 [![Build Status](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/rust.yml/badge.svg)](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/rust.yml)
 [![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.13-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
 
-
 Generate progressbars in bevy ui from simple values. The progressbars can have multiple sections.
 
 ## Install
