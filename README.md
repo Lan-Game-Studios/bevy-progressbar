@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Doc](https://docs.rs/bevy-progressbar/badge.svg)](https://docs.rs/bevy-progressbar)
 [![Crate](https://img.shields.io/crates/v/bevy-progressbar.svg)](https://crates.io/crates/bevy-progressbar)
-[![Build Status](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/rust.yaml/badge.svg)](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/rust.yaml)
+[![Build Status](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/rust.yml/badge.svg)](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/rust.yml)
 [![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.13-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
 
 
