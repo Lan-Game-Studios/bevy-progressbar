@@ -1,10 +1,10 @@
 # Bevy Progressbar
 
-[![License: MIT/Apache](https://img.shields.io/badge/License-MIT%20or%20Apache2-blue.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Doc](https://docs.rs/bevy-progressbar/badge.svg)](https://docs.rs/bevy-progressbar)
 [![Crate](https://img.shields.io/crates/v/bevy-progressbar.svg)](https://crates.io/crates/bevy-progressbar)
-[![Build Status](https://github.com/djeedai/bevy-progressbar/actions/workflows/ci.yaml/badge.svg)](https://github.com/djeedai/bevy-progressbar/actions/workflows/ci.yaml)
-[![Coverage Status](https://coveralls.io/repos/github/djeedai/bevy-progressbar/badge.svg?branch=main&kill_cache=1)](https://coveralls.io/github/djeedai/bevy-progressbar?branch=main)
+[![Build Status](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/ci.yaml/badge.svg)](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/ci.yaml)
+[![Coverage Status](https://coveralls.io/repos/github/tecbeast42/bevy-progressbar/badge.svg?branch=main&kill_cache=1)](https://coveralls.io/github/tecbeast42/bevy-progressbar?branch=main)
 [![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.13-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
 
 
