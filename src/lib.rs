@@ -1,11 +1,9 @@
 use bevy_app::prelude::Plugin;
 use bevy_asset::{load_internal_asset, prelude::Assets, Asset, Handle};
+use bevy_color::{Color, LinearRgba};
 use bevy_ecs::prelude::{Bundle, Component, Query, ResMut};
 use bevy_reflect::TypePath;
-use bevy_render::{
-    prelude::Color,
-    render_resource::{AsBindGroup, Shader},
-};
+use bevy_render::render_resource::{AsBindGroup, Shader};
 use bevy_ui::{node_bundles::MaterialNodeBundle, Style, UiMaterial, UiMaterialPlugin};
 use bevy_utils::default;
 
@@ -29,7 +27,7 @@ impl Plugin for ProgressBarPlugin {
 /// The Progress Bar.
 /// Has Different Colored section with relative size to each other
 /// and a Color for the empty space
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct ProgressBar {
     /// The Progress
     /// a f32 between 0.0 and 1.0
@@ -47,8 +45,8 @@ impl ProgressBar {
     /// # Examples
     /// ```
     /// use bevy_progressbar::ProgressBar;
-    /// use bevy_render::prelude::Color;
-    /// let bar = ProgressBar::new(vec![(10, Color::RED), (9, Color::BLUE)]);
+    /// use bevy_color::palettes::tailwind;
+    /// let bar = ProgressBar::new(vec![(10, tailwind::RED_500.into()), (9, tailwind::BLUE_500.into())]);
     /// ```
     pub fn new(sections: Vec<(u32, Color)>) -> Self {
         Self {
@@ -160,14 +158,16 @@ pub struct ProgressBarBundle {
 
 impl ProgressBarBundle {
     pub fn new(
-        style: Style,
         progressbar: ProgressBar,
         materials: &mut ResMut<Assets<ProgressBarMaterial>>,
     ) -> ProgressBarBundle {
         ProgressBarBundle {
             progressbar,
             material_node_bundle: MaterialNodeBundle {
-                style,
+                style: Style {
+                    width: bevy_ui::Val::Percent(100.0),
+                    ..default()
+                },
                 material: materials.add(ProgressBarMaterial::default()),
                 ..default()
             },
@@ -180,12 +180,12 @@ impl ProgressBarBundle {
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct ProgressBarMaterial {
     #[uniform(0)]
-    empty_color: Color,
+    empty_color: LinearRgba,
     #[uniform(1)]
     progress: f32,
     /// The color of each section
     #[storage(2, read_only)]
-    sections_color: Vec<Color>,
+    sections_color: Vec<LinearRgba>,
     #[storage(3, read_only)]
     sections_start_percentage: Vec<f32>,
     /// the length of the `sections_color` / `sections_start_percentage` vec.
@@ -197,7 +197,7 @@ pub struct ProgressBarMaterial {
 impl Default for ProgressBarMaterial {
     fn default() -> Self {
         Self {
-            empty_color: Color::NONE,
+            empty_color: LinearRgba::NONE,
             progress: 0.0,
             sections_color: vec![],
             sections_start_percentage: vec![],
@@ -209,7 +209,7 @@ impl Default for ProgressBarMaterial {
 impl ProgressBarMaterial {
     /// Updates the material to match the ProgressBar
     pub fn update(&mut self, bar: &ProgressBar) {
-        self.empty_color = bar.empty_color;
+        self.empty_color = bar.empty_color.to_linear();
         self.progress = bar.progress;
         self.sections_color = vec![];
         self.sections_start_percentage = vec![];
@@ -217,7 +217,7 @@ impl ProgressBarMaterial {
         for (amount, color) in bar.sections.iter() {
             self.sections_start_percentage
                 .push(1. / (total_amount as f32 / *amount as f32));
-            self.sections_color.push(*color);
+            self.sections_color.push(color.to_linear());
         }
         self.sections_count = bar.sections.len() as u32;
     }

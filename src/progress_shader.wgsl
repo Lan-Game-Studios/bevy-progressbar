@@ -5,9 +5,9 @@ var<uniform> empty_color: vec4<f32>;
 @group(1) @binding(1)
 var<uniform> progress: f32;
 @group(1) @binding(2)
-var<storage> segments: array<vec4<f32>>;
+var<storage, read> segments: array<vec4<f32>>;
 @group(1) @binding(3)
-var<storage> amount: array<f32>;
+var<storage, read> amount: array<f32>;
 @group(1) @binding(4)
 var<uniform> count: u32;
 
