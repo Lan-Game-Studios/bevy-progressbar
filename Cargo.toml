@@ -1,6 +1,6 @@
 [package]
 name = "bevy-progressbar"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 license = "MIT"
 description = "Create multi sectons progressbars and use them in the bevy ui"
@@ -8,18 +8,17 @@ repository = "https://github.com/tecbeast42/bevy-progressbar"
 readme = "README.md"
 keywords = ["gamedev", "progressbar", "ui", "bevy_ui"]
 categories = ["game-development"]
-exclude = [
-    ".github/*",
-]
+exclude = [".github/*", "./example.gif"]
 
 [dependencies]
-bevy_app = "0.13"
-bevy_asset = "0.13"
-bevy_ecs = "0.13"
-bevy_render = "0.13"
-bevy_ui = "0.13"
-bevy_reflect = "0.13"
-bevy_utils = "0.13"
+bevy_app = "0.14"
+bevy_color = "0.14"
+bevy_asset = "0.14"
+bevy_ecs = "0.14"
+bevy_render = "0.14"
+bevy_ui = "0.14"
+bevy_reflect = "0.14"
+bevy_utils = "0.14"
 
 [dev-dependencies]
-bevy = "0.13"
+bevy = { version = "0.14", features = ["bevy_dev_tools"] }

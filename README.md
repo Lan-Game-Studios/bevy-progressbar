@@ -4,9 +4,16 @@
 [![Doc](https://docs.rs/bevy-progressbar/badge.svg)](https://docs.rs/bevy-progressbar)
 [![Crate](https://img.shields.io/crates/v/bevy-progressbar.svg)](https://crates.io/crates/bevy-progressbar)
 [![Build Status](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/rust.yml/badge.svg)](https://github.com/tecbeast42/bevy-progressbar/actions/workflows/rust.yml)
-[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.13-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
+[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.14-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
 
-Generate progressbars in bevy ui from simple values. The progressbars can have multiple sections.
+Generate progressbars in bevy ui from simple values. 
+
+![Preview](./example.gif)
+
+## Features
+
+- [x] multi section progressbars 
+- [x] gpu based shader for rendering
 
 ## Install
 
@@ -42,8 +49,10 @@ fn setup(mut commands: Commands, mut materials: ResMut<Assets<ProgressBarMateria
 | 0.5.0   | 0.12         |
 | 0.6.0   | 0.12         |
 | 0.7.0   | 0.13         |
+| 0.8.0   | 0.14         |
 
 ## TODO
+
 - [x] optimize the image creation, by just doing one line and let the gpu use nearst neighbour to scale the texture
 - [ ] (optional) render an outline of the progessbar 
 - [ ] (optional) allow or rounded corners

@@ -1,9 +1,10 @@
+use bevy::dev_tools::ui_debug_overlay::UiDebugOptions;
 use bevy::prelude::*;
-use bevy::window::close_on_esc;
+use bevy_color::palettes::tailwind;
 use bevy_progressbar::ProgressBar;
 use bevy_progressbar::ProgressBarBundle;
 use bevy_progressbar::ProgressBarMaterial;
-use bevy_utils::Duration;
+use bevy_utils::{default, Duration};
 
 #[derive(Component)]
 struct ExampleProgress;
@@ -13,63 +14,67 @@ struct ExampleUpdateSections(pub Timer);
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(bevy_progressbar::ProgressBarPlugin)
-        .add_systems(
-            Startup,
-            (
-                |mut commands: Commands| {
-                    commands.spawn(Camera2dBundle::default());
-                },
-                setup,
-            ),
-        )
+        .add_plugins((DefaultPlugins, bevy_progressbar::ProgressBarPlugin))
+        .add_plugins(bevy::dev_tools::ui_debug_overlay::DebugUiPlugin)
+        .add_systems(Startup, (setup,))
         .add_systems(Update, (increase_progress, update_sections, close_on_esc))
         .run();
 }
 
-fn setup(mut commands: Commands, mut materials: ResMut<Assets<ProgressBarMaterial>>) {
-    let bar = ProgressBar::new(vec![(200, Color::RED), (400, Color::BLUE)]);
-    let style = Style {
-        position_type: PositionType::Absolute,
-        width: Val::Px(400.0),
-        height: Val::Px(200.0),
-        ..bevy_utils::default()
-    };
+fn setup(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ProgressBarMaterial>>,
+    mut options: ResMut<UiDebugOptions>,
+) {
+    options.enabled = true;
+    commands.spawn(Camera2dBundle::default());
     commands
-        .spawn(ProgressBarBundle::new(style, bar, &mut materials))
-        .insert(ExampleProgress);
+        .spawn(NodeBundle {
+            style: Style {
+                position_type: PositionType::Absolute,
+                display: Display::Grid,
+                padding: UiRect::all(Val::Px(36.0)),
+                row_gap: Val::Px(12.0),
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                ..default()
+            },
+            ..default()
+        })
+        .with_children(|wrapper| {
+            for (index, bar) in [
+                ProgressBar::new(vec![
+                    (200, tailwind::RED_500.into()),
+                    (400, tailwind::BLUE_500.into()),
+                ]),
+                ProgressBar::new(vec![
+                    (200, tailwind::RED_500.into()),
+                    (400, tailwind::BLUE_500.into()),
+                    (300, tailwind::GREEN_500.into()),
+                ])
+                .set_progress(1.0)
+                .clone(),
+                ProgressBar::new(vec![(200, tailwind::RED_500.into())])
+                    .set_progress(1.0)
+                    .clone(),
+            ]
+            .into_iter()
+            .enumerate()
+            {
+                let mut entity_command = wrapper.spawn(ProgressBarBundle::new(bar, &mut materials));
 
-    let mut bar = ProgressBar::new(vec![
-        (200, Color::RED),
-        (400, Color::BLUE),
-        (300, Color::GREEN),
-    ]);
-    bar.set_progress(1.0);
-    let style = Style {
-        position_type: PositionType::Absolute,
-        width: Val::Percent(100.0),
-        height: Val::Px(200.0),
-        top: Val::Px(200.0),
-        ..bevy_utils::default()
-    };
-    commands.spawn(ProgressBarBundle::new(style, bar, &mut materials));
+                if index == 0 {
+                    entity_command.insert(ExampleProgress);
+                }
 
-    let mut bar = ProgressBar::new(vec![(200, Color::RED)]);
-    bar.set_progress(1.0);
-    let style = Style {
-        position_type: PositionType::Absolute,
-        width: Val::Px(400.0),
-        height: Val::Px(200.0),
-        top: Val::Px(400.0),
-        ..bevy_utils::default()
-    };
-    commands
-        .spawn(ProgressBarBundle::new(style, bar, &mut materials))
-        .insert(ExampleUpdateSections(Timer::new(
-            Duration::from_secs(2),
-            TimerMode::Repeating,
-        )));
+                if index == 2 {
+                    entity_command.insert(ExampleUpdateSections(Timer::new(
+                        Duration::from_secs(2),
+                        TimerMode::Repeating,
+                    )));
+                }
+            }
+        });
 }
 
 fn increase_progress(mut query: Query<&mut ProgressBar, With<ExampleProgress>>) {
@@ -89,12 +94,28 @@ fn update_sections(
         timer.0.tick(time.delta());
         if timer.0.just_finished() {
             match bar.sections.len() {
-                0 => bar.add_section(200, Color::RED),
-                1 => bar.add_section(100, Color::GRAY),
-                2 => bar.add_section(150, Color::BLUE),
-                3 => bar.add_section(400, Color::GREEN),
+                0 => bar.add_section(200, tailwind::RED_500.into()),
+                1 => bar.add_section(100, tailwind::GRAY_500.into()),
+                2 => bar.add_section(150, tailwind::BLUE_500.into()),
+                3 => bar.add_section(400, tailwind::GREEN_500.into()),
                 _ => bar.clear_sections(),
             };
+        }
+    }
+}
+
+fn close_on_esc(
+    mut commands: Commands,
+    focused_windows: Query<(Entity, &Window)>,
+    input: Res<ButtonInput<KeyCode>>,
+) {
+    for (window, focus) in focused_windows.iter() {
+        if !focus.focused {
+            continue;
+        }
+
+        if input.just_pressed(KeyCode::Escape) {
+            commands.entity(window).despawn();
         }
     }
 }
